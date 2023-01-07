@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static com.tinyurl.constants.Constants.ALIAS_REGEX;
 import static com.tinyurl.utils.LinkBuilder.linkTo;
@@ -25,14 +26,13 @@ import static com.tinyurl.utils.LinkBuilder.linkTo;
 public class RedirectService {
 
     private final RedirectRepository redirectRepository;
+    private static final Random random = new Random();
 
     public List<RedirectCreateResponse> createRedirectList(List<RedirectCreateRequest> requests) {
+        log.info("Incoming request to the service. Processing of the request list has started.");
         List<Redirect> redirectList = new ArrayList<>();
         requests.forEach(request -> {
-            String alias = optionalGenerateAliasId(request.getAlias());
-            if (aliasExist(alias)) {
-                throw new AlreadyExistsException("Alias: '" + alias + "' already exists in the system.");
-            }
+            String alias = validateOrGenerateAliasId(request.getAlias());
             redirectList.add(new Redirect(request.getUrl(), alias));
         });
         return redirectRepository.saveAll(redirectList).stream().map(this::toResponse).toList();
@@ -42,20 +42,30 @@ public class RedirectService {
         return redirectRepository.findUrlByAlias(alias).orElseThrow(() -> new NotFoundException("Provided alias was not found in the system."));
     }
 
-    public RedirectCreateResponse toResponse(Redirect redirect) {
+    private RedirectCreateResponse toResponse(Redirect redirect) {
         return new RedirectCreateResponse(redirect.getAlias(), redirect.getUrl(), linkTo(redirect.getAlias()));
     }
 
-    private String optionalGenerateAliasId(String alias) {
+    public String validateOrGenerateAliasId(String alias) {
         if (isValidAlias(alias)) {
+            if (aliasExists(alias))
+                throw new AlreadyExistsException("Alias: '" + alias + "' already exists in the system.");
             return alias;
+        } else {
+            return generateUniqueAliasId();
         }
+    }
+
+    private String generateUniqueAliasId() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         int charactersLength = characters.length();
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < 7; i++) {
-            result.append(characters.charAt((int) Math.floor(Math.random() * charactersLength)));
-        }
+        do {
+            result.setLength(0);
+            for (int i = 0; i < 7; i++) {
+                result.append(characters.charAt(random.nextInt(charactersLength)));
+            }
+        } while (aliasExists(result.toString()));
         return result.toString();
     }
 
@@ -69,7 +79,7 @@ public class RedirectService {
         return false;
     }
 
-    public boolean aliasExist(String alias) {
+    public boolean aliasExists(String alias) {
         return redirectRepository.findUrlByAlias(alias).isPresent();
     }
 

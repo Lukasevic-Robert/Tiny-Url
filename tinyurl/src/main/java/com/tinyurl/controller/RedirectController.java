@@ -28,7 +28,7 @@ public class RedirectController {
 
     @GetMapping("/{alias}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> redirect(@PathVariable String alias) throws URISyntaxException {
+    public ResponseEntity<HttpHeaders> redirect(@PathVariable String alias) throws URISyntaxException {
         URI uri = new URI(service.getRedirect(alias));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(uri);
