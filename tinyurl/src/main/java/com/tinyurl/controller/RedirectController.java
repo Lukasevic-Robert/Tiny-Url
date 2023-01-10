@@ -4,6 +4,7 @@ package com.tinyurl.controller;
 import com.tinyurl.dto.RedirectCreateRequest;
 import com.tinyurl.dto.RedirectCreateResponse;
 import com.tinyurl.service.RedirectService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class RedirectController {
 
     @GetMapping("/{alias}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<HttpHeaders> redirect(@PathVariable String alias) throws URISyntaxException {
+    public ResponseEntity<HttpHeaders> redirect(@Parameter(description = "Existing alias string that is wired to original url.", example = "takeMeToGoogle") @PathVariable String alias) throws URISyntaxException {
         URI uri = new URI(service.getRedirect(alias));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(uri);

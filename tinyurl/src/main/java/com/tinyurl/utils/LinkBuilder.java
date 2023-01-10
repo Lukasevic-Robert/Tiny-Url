@@ -1,14 +1,16 @@
 package com.tinyurl.utils;
 
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import com.tinyurl.controller.RedirectController;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 public class LinkBuilder {
 
     private LinkBuilder() {
     }
 
+    private static final String BASE_URI = MvcUriComponentsBuilder.fromController(RedirectController.class).build().toString();
+
     public static String linkTo(String alias) {
-        String baseUri = ServletUriComponentsBuilder.fromCurrentServletMapping().build().toString();
-        return baseUri + "/" + alias;
+        return BASE_URI + alias;
     }
 }
