@@ -30,21 +30,6 @@ class RedirectServiceTest {
     private static final String TINY_URL = "http://localhost/";
     private static final String ALIAS = "alias";
     private static final String INVALID_ALIAS = "invalid+alias";
-    private static final String REQUEST = """
-            [
-                {
-                    "alias": "test",
-                    "url": "https://example-long-url.lt/"
-                }
-            ]""";
-    private static final String RESPONSE = """
-            [
-                {
-                    "alias": "test",
-                    "originalUrl": "https://example-long-url.lt/",
-                    "tinyUrl": "http://localhost/test"
-                }
-            ]""";
 
     @Test
     void getRedirectByAlias() {
